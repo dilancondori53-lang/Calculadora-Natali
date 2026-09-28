@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>✦ Calculadora de Bioestadística</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1224;
+    --bg2:#171C36;
+    --panel:#1B2140;
+    --border:#2E3560;
+    --text:#E7E9F5;
+    --muted:#9CA3C4;
+    --star:#F5D97A;
+    --accent:#7C9CFF;
+    --accent2:#F5D97A;
+    --good:#7FE0B8;
+    --bad:#F29B8C;
+  }
+  html{color-scheme:dark;}
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, #ffffff88 0, transparent 60%),
+      radial-gradient(1px 1px at 80% 10%, #ffffff66 0, transparent 60%),
+      radial-gradient(1.5px 1.5px at 60% 30%, #ffffffaa 0, transparent 60%),
+      radial-gradient(1px 1px at 30% 70%, #ffffff55 0, transparent 60%),
+      radial-gradient(1px 1px at 90% 60%, #ffffff77 0, transparent 60%),
+      radial-gradient(1.5px 1.5px at 45% 85%, #ffffff99 0, transparent 60%),
+      radial-gradient(1px 1px at 15% 90%, #ffffff55 0, transparent 60%);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    min-height:100%;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:32px 18px 60px;}
+
+  header{margin-bottom:26px;}
+  .star-mark{font-size:1.4rem; color:var(--star); letter-spacing:2px;}
+  h1{
+    font-weight:700;
+    font-size:clamp(1.3rem,3.6vw,1.8rem);
+    margin:8px 0 4px;
+    color:var(--text);
+  }
+  .subtitle{margin:0; color:var(--muted); font-size:.92rem;}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px 20px 26px;
+    margin-bottom:24px;
+  }
+  .kicker{
+    display:inline-block;
+    font-size:.78rem;
+    letter-spacing:.03em;
+    color:var(--accent2);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:3px 10px;
+    margin-bottom:10px;
+  }
+  h2{font-size:1.05rem; font-weight:500; margin:4px 0 18px; color:var(--text);}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:14px;
+    margin-bottom:18px;
+  }
+  label{
+    display:block; font-size:.78rem; color:var(--muted); margin-bottom:6px;
+  }
+  .field{position:relative;}
+  input[type=number]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:7px;
+    background:var(--bg2);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.95rem;
+  }
+  input[type=number]:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .unit{
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    color:var(--muted); font-size:.8rem; pointer-events:none;
+  }
+
+  button.calc{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:.92rem;
+    background:var(--accent);
+    color:#0E1224;
+    border:none;
+    border-radius:7px;
+    padding:10px 20px;
+    cursor:pointer;
+  }
+  button.calc:hover{background:#93aeff;}
+
+  .pop-summary{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 4px;}
+  .pill{
+    flex:1; min-width:140px;
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:10px 12px;
+  }
+  .pill .n{font-size:1.15rem; font-weight:700;}
+  .pill .l{font-size:.74rem; color:var(--muted);}
+
+  .table-wrap{overflow-x:auto; margin-top:20px;}
+  table.contingency{
+    border-collapse:collapse; width:100%; min-width:440px; font-size:.9rem;
+  }
+  table.contingency th, table.contingency td{
+    border:1px solid var(--border);
+    padding:10px 8px;
+    text-align:center;
+  }
+  table.contingency thead th{background:var(--bg2); font-weight:700; color:var(--accent2); font-size:.8rem;}
+  table.contingency td.corner, table.contingency th.corner{background:var(--bg2);}
+  table.contingency td.label{background:var(--bg2); font-weight:700; font-size:.8rem; color:var(--muted);}
+  table.contingency td.vp, table.contingency td.vn{color:var(--good);}
+  table.contingency td.fp, table.contingency td.fn{color:var(--bad);}
+  table.contingency .big{font-weight:700; font-size:1rem; display:block;}
+  table.contingency .small{font-size:.68rem; color:var(--muted); display:block; margin-top:2px;}
+  table.contingency td.total{background:var(--accent); color:#0E1224; font-weight:700;}
+  table.contingency tr:last-child td.total{background:var(--star); color:#0E1224;}
+
+  .formula-box{display:flex; gap:22px; flex-wrap:wrap; margin-top:6px;}
+  .explain{flex:1 1 240px; font-size:.88rem; color:var(--muted); line-height:1.5;}
+  .formula-steps{flex:1 1 240px;}
+  .formula-line{
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:7px;
+    padding:9px 12px;
+    margin-bottom:8px;
+    font-size:.86rem;
+  }
+  .badges{display:flex; gap:12px; flex-wrap:wrap; margin-top:14px;}
+  .result-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--bg2);
+    border:1px solid var(--accent2);
+    color:var(--accent2);
+    border-radius:7px;
+    padding:9px 16px;
+    font-weight:700;
+    font-size:1rem;
+  }
+
+  .hint{font-size:.76rem; color:var(--muted); margin-top:8px;}
+  .placeholder{color:var(--muted); font-size:.9rem; padding:10px 0;}
+
+  footer{text-align:center; color:var(--muted); font-size:.76rem; margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="star-mark">✦ ✧ ✦</div>
+    <h1>Calculadora de Bioestadística</h1>
+    <p class="subtitle">Tabla de contingencia 2×2 · Valor Predictivo Positivo y Negativo</p>
+  </header>
+
+  <!-- ================= CALCULADORA 1 ================= -->
+  <section class="card">
+    <span class="kicker">Calculadora 1</span>
+    <h2>Construcción de la tabla de contingencia 2×2 (población basal)</h2>
+
+    <div class="grid">
+      <div class="field">
+        <label for="poblacion">Población total (N)</label>
+        <input type="number" id="poblacion" value="100000" min="0" step="1">
+      </div>
+      <div class="field">
+        <label for="prevalencia">Prevalencia (P)</label>
+        <input type="number" id="prevalencia" value="1.5" min="0" max="100" step="0.01">
+        <span class="unit">%</span>
+      </div>
+      <div class="field">
+        <label for="sensibilidad">Sensibilidad (S)</label>
+        <input type="number" id="sensibilidad" value="96" min="0" max="100" step="0.01">
+        <span class="unit">%</span>
+      </div>
+      <div class="field">
+        <label for="especificidad">Especificidad (E)</label>
+        <input type="number" id="especificidad" value="93" min="0" max="100" step="0.01">
+        <span class="unit">%</span>
+      </div>
+    </div>
+
+    <button class="calc" onclick="calcular()">Calcular tabla</button>
+
+    <div id="resultadosPaso1"></div>
+  </section>
+
+  <!-- ================= CALCULADORA 2 (independiente) ================= -->
+  <section class="card">
+    <span class="kicker">Calculadora 2</span>
+    <h2>Cálculo del Valor Predictivo Positivo (VPP) y Valor Predictivo Negativo (VPN)</h2>
+    <p class="hint" style="margin-bottom:16px;">Calculadora independiente: ingresá tus propios VP, FP, FN y VN de cualquier tabla 2×2.</p>
+
+    <div class="grid">
+      <div class="field">
+        <label for="vp2">Verdaderos Positivos (VP)</label>
+        <input type="number" id="vp2" value="" min="0" step="1" placeholder="Ej: 1440">
+      </div>
+      <div class="field">
+        <label for="fp2">Falsos Positivos (FP)</label>
+        <input type="number" id="fp2" value="" min="0" step="1" placeholder="Ej: 6895">
+      </div>
+      <div class="field">
+        <label for="fn2">Falsos Negativos (FN)</label>
+        <input type="number" id="fn2" value="" min="0" step="1" placeholder="Ej: 60">
+      </div>
+      <div class="field">
+        <label for="vn2">Verdaderos Negativos (VN)</label>
+        <input type="number" id="vn2" value="" min="0" step="1" placeholder="Ej: 91605">
+      </div>
+    </div>
+
+    <button class="calc" onclick="calcularVPPVPN()">Calcular VPP y VPN</button>
+
+    <div id="resultadosPaso2" style="margin-top:18px;">
+      <p class="placeholder">Ingresá los valores de VP, FP, FN y VN, y presioná calcular.</p>
+    </div>
+  </section>
+
+  <footer>✦ Calculadora de bioestadística ✦</footer>
+</div>
+
+<script>
+function fmt(n, dec=0){
+  return Number(n).toLocaleString('es-ES', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+
+function calcular(){
+  const N = parseFloat(document.getElementById('poblacion').value) || 0;
+  const P = parseFloat(document.getElementById('prevalencia').value) || 0;
+  const S = parseFloat(document.getElementById('sensibilidad').value) || 0;
+  const E = parseFloat(document.getElementById('especificidad').value) || 0;
+
+  const enfermos = N * (P/100);
+  const sanos = N - enfermos;
+
+  const VP = enfermos * (S/100);
+  const FN = enfermos - VP;
+  const VN = sanos * (E/100);
+  const FP = sanos - VN;
+
+  const paso1 = document.getElementById('resultadosPaso1');
+  paso1.innerHTML = `
+    <div class="pop-summary">
+      <div class="pill"><div class="n">${fmt(enfermos,0)}</div><div class="l">Enfermos = N × P</div></div>
+      <div class="pill"><div class="n">${fmt(sanos,0)}</div><div class="l">Sanos = N − Enfermos</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="contingency">
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            <th>Enfermos</th>
+            <th>Sanos</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="label">Prueba (+)</td>
+            <td class="vp"><span class="big">${fmt(VP,0)}</span><span class="small">VP = Enfermos × S</span></td>
+            <td class="fp"><span class="big">${fmt(FP,0)}</span><span class="small">FP = Sanos − VN</span></td>
+            <td class="total">${fmt(VP+FP,0)}</td>
+          </tr>
+          <tr>
+            <td class="label">Prueba (−)</td>
+            <td class="fn"><span class="big">${fmt(FN,0)}</span><span class="small">FN = Enfermos − VP</span></td>
+            <td class="vn"><span class="big">${fmt(VN,0)}</span><span class="small">VN = Sanos × E</span></td>
+            <td class="total">${fmt(FN+VN,0)}</td>
+          </tr>
+          <tr>
+            <td class="total">Total</td>
+            <td class="total">${fmt(enfermos,0)}</td>
+            <td class="total">${fmt(sanos,0)}</td>
+            <td class="total">${fmt(N,0)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="hint">VP = Verdaderos Positivos · FN = Falsos Negativos · VN = Verdaderos Negativos · FP = Falsos Positivos</p>
+  `;
+}
+
+function calcularVPPVPN(){
+  const VP = parseFloat(document.getElementById('vp2').value) || 0;
+  const FP = parseFloat(document.getElementById('fp2').value) || 0;
+  const FN = parseFloat(document.getElementById('fn2').value) || 0;
+  const VN = parseFloat(document.getElementById('vn2').value) || 0;
+
+  const VPP = (VP + FP) > 0 ? (VP / (VP + FP)) * 100 : 0;
+  const VPN = (VN + FN) > 0 ? (VN / (VN + FN)) * 100 : 0;
+
+  const paso2 = document.getElementById('resultadosPaso2');
+  paso2.innerHTML = `
+    <div class="formula-box">
+      <div class="explain">
+        <p><strong style="color:var(--text)">VPP</strong>: probabilidad de que una persona realmente tenga la enfermedad cuando la prueba resulta positiva.</p>
+        <p><strong style="color:var(--text)">VPN</strong>: probabilidad de que una persona realmente esté sana cuando la prueba resulta negativa.</p>
+      </div>
+      <div class="formula-steps">
+        <div class="formula-line">VPP = VP / (VP + FP) × 100</div>
+        <div class="formula-line">VPP = ${fmt(VP,0)} / (${fmt(VP,0)} + ${fmt(FP,0)}) × 100</div>
+        <div class="formula-line">VPN = VN / (VN + FN) × 100</div>
+        <div class="formula-line">VPN = ${fmt(VN,0)} / (${fmt(VN,0)} + ${fmt(FN,0)}) × 100</div>
+      </div>
+    </div>
+    <div class="badges">
+      <span class="result-badge">✦ VPP = ${fmt(VPP,2)}%</span>
+      <span class="result-badge">✦ VPN = ${fmt(VPN,2)}%</span>
+    </div>
+  `;
+}
+
+window.addEventListener('DOMContentLoaded', calcular);
+</script>
+</body>
+</html>
